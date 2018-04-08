@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+cmake-*
+
+.DS_Store
+build/

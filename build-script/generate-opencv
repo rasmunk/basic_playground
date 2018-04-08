@@ -1,0 +1,17 @@
+#!/bin/sh
+RELEASE="../build/release"
+
+if [ ! -d "$RELEASE" ] ; then
+    mkdir -p "$RELEASE"
+fi
+
+## Generate release executable
+cd "$RELEASE"
+
+## TODO -> clean up
+cmake -DMAKE_BUILD_TYPE=Release -DOPENCV_EXTRA_MODULES_PATH=../../../opencv_contrib/modules/ -DBUILD_opencv_{calib3d}=OFF -DBUILD_opencv_{cudaarithm}=OFF \
+    -DBUILD_opencv_{cudabgsegm}=OFF -DBUILD_opencv_{cudaarithm}=OFF -DBUILD_opencv_{cudabgsegm}=OFF -DBUILD_opencv_{cudacodec}=OFF -DBUILD_opencv_{cudafeatures2d}=OFF \
+    -DBUILD_opencv_{cudafilters}=OFF -DBUILD_opencv_{cudaimgproc}=OFF -DBUILD_opencv_{cudalegacy}=OFF -DBUILD_opencv_{cudaobjdetect}=OFF -DBUILD_opencv_{cudaoptflow}=OFF \
+    -DBUILD_opencv_{cudastereo}=OFF -DBUILD_opencv_{cudawarping}=OFF -DBUILD_opencv_{cudev}=OFF -DBUILD_opencv_{java}=OFF -DBUILD_opencv_{python}=OFF -DBUILD_opencv_{shape}=OFF \
+    -DBUILD_opencv_{stitching}=OFF -DBUILD_opencv_{superres}=OFF -DBUILD_opencv_{ts}=OFF ../..
+make install -j4
