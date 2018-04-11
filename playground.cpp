@@ -466,9 +466,6 @@ int main(int argc, char *argv[])
 				countOfThisType++;
 
 				// setup in the world
-				/*robot->pos.x = robotE.attribute("x").toDouble();
-				robot->pos.y = robotE.attribute("y").toDouble();*/
-
 				robot->pos.x = weight_dis(gen);
 				robot->pos.y = height_dis(gen);
 				robot->angle = robotE.attribute("angle").toDouble();

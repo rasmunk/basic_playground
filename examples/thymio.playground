@@ -5,7 +5,7 @@
 	<color name="green" r="0" g="0." b="0.17" />
 	<color name="blue" r="0" g="0.38" b="0.61" />
 	
-	<world w="110.4" h="110.4" color="wall"/>
+	<world w="500.4" h="500.4" color="wall"/>
 	
 	<robot type="thymio2" x="15" y="30"/>
 </aseba-playground>
