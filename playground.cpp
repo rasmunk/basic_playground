@@ -433,44 +433,47 @@ int main(int argc, char *argv[])
 	};
 	QDomElement robotE = domDocument.documentElement().firstChildElement("robot");
 	unsigned asebaServerCount(0);
+	int num_robots = 200;
 	while (!robotE.isNull())
 	{
-		const auto type(robotE.attribute("type", "thymio2"));
-		auto typeIt(robotTypes.find(type.toStdString()));
-		if (typeIt != robotTypes.end())
-		{
-			// retrieve informations
-			const auto& cppTypeName(typeIt->second.prettyName);
-			const auto qTypeName(QString::fromStdString(cppTypeName));
-			auto& countOfThisType(typeIt->second.number);
-			const auto qRobotName(robotE.attribute("name", QString("%1 %2").arg(qTypeName).arg(countOfThisType)));
-			const auto cppRobotName(qRobotName.toStdString());
-			const unsigned port(robotE.attribute("port", QString("%1").arg(ASEBA_DEFAULT_PORT+asebaServerCount)).toUInt());
-			const int16_t nodeId(robotE.attribute("nodeId", "1").toInt());
-			
-			// create
-			const auto& creator(typeIt->second.factory);
-			auto instance(creator(port, cppRobotName, cppTypeName, nodeId));
-			auto robot(instance.robot);
-			asebaServerCount++;
-			countOfThisType++;
-			
-			// setup in the world
-			robot->pos.x = robotE.attribute("x").toDouble();
-			robot->pos.y = robotE.attribute("y").toDouble();
-			robot->angle = robotE.attribute("angle").toDouble();
-			world.addObject(robot);
-			
-			// advertise
-			viewer.log(app.tr("New robot %0 of type %1 on port %2").arg(qRobotName).arg(qTypeName).arg(port), Qt::white);
+		for (int i = 0; i < num_robots; ++i) {
+			const auto type(robotE.attribute("type", "thymio2"));
+			auto typeIt(robotTypes.find(type.toStdString()));
+			if (typeIt != robotTypes.end())
+			{
+				// retrieve informations
+				const auto& cppTypeName(typeIt->second.prettyName);
+				const auto qTypeName(QString::fromStdString(cppTypeName));
+				auto& countOfThisType(typeIt->second.number);
+				const auto qRobotName(robotE.attribute("name", QString("%1 %2").arg(qTypeName).arg(countOfThisType)));
+				const auto cppRobotName(qRobotName.toStdString());
+				const unsigned port(robotE.attribute("port", QString("%1").arg(ASEBA_DEFAULT_PORT+asebaServerCount)).toUInt());
+				const int16_t nodeId(robotE.attribute("nodeId", "1").toInt());
+
+				// create
+				const auto& creator(typeIt->second.factory);
+				auto instance(creator(port, cppRobotName, cppTypeName, nodeId));
+				auto robot(instance.robot);
+				asebaServerCount++;
+				countOfThisType++;
+
+				// setup in the world
+				robot->pos.x = robotE.attribute("x").toDouble();
+				robot->pos.y = robotE.attribute("y").toDouble();
+				robot->angle = robotE.attribute("angle").toDouble();
+				world.addObject(robot);
+
+				// advertise
+				viewer.log(app.tr("New robot %0 of type %1 on port %2").arg(qRobotName).arg(qTypeName).arg(port), Qt::white);
 #ifdef ZEROCONF_SUPPORT
-			zeroconf.advertise(cppRobotName, port, instance.zeroconfProperties);
+				zeroconf.advertise(cppRobotName, port, instance.zeroconfProperties);
 #endif // ZEROCONF_SUPPORT
+			}
+			else
+				viewer.log("Error, unknown robot type " + type, Qt::red);
+
+			robotE = robotE.nextSiblingElement ("robot");
 		}
-		else
-			viewer.log("Error, unknown robot type " + type, Qt::red);
-		
-		robotE = robotE.nextSiblingElement ("robot");
 	}
 	
 	// Scan for external processes
