@@ -26,6 +26,7 @@
 */
 
 #include "common/utils/FormatableString.h"
+#include "network/GrpcServer.h"
 #include "DashelAsebaGlue.h"
 #include "sim/Door.h"
 #include "PlaygroundViewer.h"
@@ -44,6 +45,8 @@
 
 #ifdef HAVE_DBUS
 #include "PlaygroundDBusAdaptors.h"
+#include "network/RobotServiceImpl.h"
+
 #endif // HAVE_DBUS
 
 #ifdef ZEROCONF_SUPPORT
@@ -92,6 +95,8 @@ namespace Enki
 	};
 }
 
+enum Managed_by {NETWORK, LOCAL};
+
 // support for robot factory
 struct RobotInstance
 {
@@ -132,28 +137,21 @@ struct RobotType
 	unsigned number = 0;
 };
 
+using namespace std;
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 	app.setOrganizationName("Aseba"); // FIXME: we should be consistent here
 	app.setApplicationName("Playground");
-	
-	/*
-	// Translation support
-	QTranslator qtTranslator;
-	qtTranslator.load("qt_" + QLocale::system().name());
-	app.installTranslator(&qtTranslator);
-	
-	QTranslator translator;
-	translator.load(QString(":/asebachallenge_") + QLocale::system().name());
-	app.installTranslator(&translator);
-	*/
-	
+
+	// Managed by network or local?
+    auto managed_by = NETWORK;
+
 	// create document
 	QDomDocument domDocument("aseba-playground");
 	QString sceneFileName;
-	
+
 	// Get cmd line arguments
 	bool ask = true;
 	if (argc > 1)
@@ -441,7 +439,7 @@ int main(int argc, char *argv[])
 	std::uniform_real_distribution<> weight_dis(0.0, world.w);
 
 	unsigned asebaServerCount(0);
-	int num_robots = 200;
+	int num_robots = 1;
 	while (!robotE.isNull())
 	{
 		for (int i = 0; i < num_robots; ++i) {
@@ -522,7 +520,15 @@ int main(int argc, char *argv[])
 		}
 		procssE = procssE.nextSiblingElement("process");
 	}
-	
+
+	// Network Support
+	/*unique_ptr<GrpcServer> grpcServer;
+	unique_ptr<RobotServiceImpl> robotService;
+	if (managed_by == NETWORK) {
+		robotService = make_unique<RobotServiceImpl>(world);
+		grpcServer = make_unique<GrpcServer>("127.0.0.1:29000", *robotService);
+	}*/
+
 	// Show and run
 	viewer.setWindowTitle(app.tr("Aseba Playground - Simulate your robots!"));
 	viewer.show();

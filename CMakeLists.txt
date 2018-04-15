@@ -12,15 +12,21 @@ link_directories(/usr/local/lib)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
 include(CMakeModules/ParseVersion.cmake)
 
-# Required packages
+# Dashel
 find_package(dashel REQUIRED)
 include_directories(${dashel_INCLUDE_DIRS})
 
+# Enki
 set(enki_DIR /usr/local/Frameworks/enki.framework/Resources/CMake)
 find_package(enki REQUIRED)
 
+# QT
 set(Qt5_DIR /usr/local/Cellar/qt/5.10.1/lib/cmake/Qt5)
 find_package(Qt5 COMPONENTS Core Gui Widgets Network Help Multimedia Concurrent Xml Svg Test DBus OpenGL REQUIRED)
+
+# Protobuf
+find_package(Protobuf REQUIRED)
+find_package(GRPC REQUIRED)
 
 # Aseba itself
 set(LIB_INSTALL_DIR lib CACHE FILEPATH "Where to install libraries")
@@ -41,6 +47,7 @@ set(ASEBA_CORE_LIBRARIES asebadashelplugins asebacommon ${dashel_LIBRARIES})
 # Target and client specific libraries
 add_subdirectory(vm)
 add_subdirectory(compiler)
+add_subdirectory(network)
 add_subdirectory(sim)
 
 find_package(OpenGL REQUIRED)
@@ -63,5 +70,5 @@ set(ASEBA_CORE_LIBRARIES asebadashelplugins asebacommon ${dashel_LIBRARIES})
 add_executable(asebaplayground WIN32 ${playground_SRCS} ${playground_MOCS})
 target_link_libraries(asebaplayground asebasim asebavmbuffer asebavm asebazeroconfqt
 		${enki_VIEWER_LIBRARIES} ${enki_LIBRARY} ${OPENGL_LIBRARIES}
-		Qt5::OpenGL Qt5::Widgets Qt5::Xml ${ASEBA_CORE_LIBRARIES} ${EXTRA_LIBS})
+		Qt5::OpenGL Qt5::Widgets Qt5::Xml ${ASEBA_CORE_LIBRARIES} network messages ${EXTRA_LIBS})
 install(TARGETS asebaplayground RUNTIME DESTINATION bin LIBRARY DESTINATION bin)
