@@ -5,18 +5,21 @@
 #ifndef PLAYGROUND_ROBOTSERVICEIMPL_H
 #define PLAYGROUND_ROBOTSERVICEIMPL_H
 
-#include <network/messages/simulation.ph.b>
-//#include "../cmake-build-release/network/messages/simulation.grpc.pb.h"
+#include <network/messages/simulation.grpc.pb.h>
 #include <enki/PhysicalEngine.h>
+#include "../sim/Robots.h"
 
 class RobotServiceImpl final : public network::RobotService::Service
 {
 private:
     Enki::World& _world;
+    std::map<std::string, Enki::RobotType>& _roboTypes;
 
 public:
-    RobotServiceImpl(Enki::World& world) : _world(world) {};
-    //grpc::Status Add(grpc::ServerContext*, const network::Robot*, network::Response*) override;
+    RobotServiceImpl(Enki::World &world, std::map<std::string, Enki::RobotType> &roboTypes) :
+            _world(world), _roboTypes(roboTypes) {};
+
+    grpc::Status Add(grpc::ServerContext *, const network::Robot *, network::Response *) override;
 };
 
 

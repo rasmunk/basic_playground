@@ -97,45 +97,6 @@ namespace Enki
 
 enum Managed_by {NETWORK, LOCAL};
 
-// support for robot factory
-struct RobotInstance
-{
-	Enki::Robot* robot;
-#ifdef ZEROCONF_SUPPORT
-	const Aseba::Zeroconf::TxtRecord zeroconfProperties;
-#endif // ZEROCONF_SUPPORT
-};
-
-template<typename RobotT>
-RobotInstance createRobotSingleVMNode(unsigned port, std::string robotName, std::string typeName, int16_t nodeId)
-{
-	auto robot(new RobotT(port, std::move(robotName), nodeId));
-#ifdef ZEROCONF_SUPPORT
-	const Aseba::Zeroconf::TxtRecord txt
-	{
-		ASEBA_PROTOCOL_VERSION,
-		std::move(typeName),
-		false,
-		{ robot->vm.nodeId },
-		{ static_cast<unsigned int>(robot->variables.productId) }
-	};
-	return { robot, txt };
-#else // ZEROCONF_SUPPORT
-	return { robot };
-#endif // ZEROCONF_SUPPORT
-}
-
-using RobotFactory = std::function<RobotInstance(unsigned, std::string, std::string, int16_t)>;
-struct RobotType
-{
-	RobotType(std::string prettyName, RobotFactory factory):
-		prettyName(std::move(prettyName)),
-		factory(std::move(factory))
-	{}
-	const std::string prettyName;
-	const RobotFactory factory;
-	unsigned number = 0;
-};
 
 using namespace std;
 
@@ -427,9 +388,9 @@ int main(int argc, char *argv[])
 	}
 	
 	// load all robots in one loop
-	std::map<std::string, RobotType> robotTypes {
-		{ "thymio2", { "Thymio II", createRobotSingleVMNode<Enki::DashelAsebaThymio2> } },
-		{ "e-puck", { "E-Puck", createRobotSingleVMNode<Enki::DashelAsebaFeedableEPuck> } },
+	std::map<std::string, Enki::RobotType> robotTypes {
+		{ "thymio2", { "Thymio II", Enki::createRobotSingleVMNode<Enki::DashelAsebaThymio2> } },
+		{ "e-puck", { "E-Puck", Enki::createRobotSingleVMNode<Enki::DashelAsebaFeedableEPuck> } },
 	};
 	QDomElement robotE = domDocument.documentElement().firstChildElement("robot");
 
@@ -522,12 +483,12 @@ int main(int argc, char *argv[])
 	}
 
 	// Network Support
-	/*unique_ptr<GrpcServer> grpcServer;
+	unique_ptr<GrpcServer> grpcServer;
 	unique_ptr<RobotServiceImpl> robotService;
 	if (managed_by == NETWORK) {
-		robotService = make_unique<RobotServiceImpl>(world);
+		robotService = make_unique<RobotServiceImpl>(world, robotTypes);
 		grpcServer = make_unique<GrpcServer>("127.0.0.1:29000", *robotService);
-	}*/
+	}
 
 	// Show and run
 	viewer.setWindowTitle(app.tr("Aseba Playground - Simulate your robots!"));

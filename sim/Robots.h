@@ -35,6 +35,47 @@ namespace Enki
 
 	typedef DashelConnected<AsebaThymio2> DashelAsebaThymio2;
 	typedef DashelConnected<AsebaFeedableEPuck> DashelAsebaFeedableEPuck;
+
+	// robot support types
+    // support for robot factory
+    struct RobotInstance
+    {
+        Enki::Robot* robot;
+#ifdef ZEROCONF_SUPPORT
+        const Aseba::Zeroconf::TxtRecord zeroconfProperties;
+#endif // ZEROCONF_SUPPORT
+    };
+
+    template<typename RobotT>
+    RobotInstance createRobotSingleVMNode(unsigned port, std::string robotName, std::string typeName, int16_t nodeId)
+    {
+        auto robot(new RobotT(port, std::move(robotName), nodeId));
+#ifdef ZEROCONF_SUPPORT
+        const Aseba::Zeroconf::TxtRecord txt
+	{
+		ASEBA_PROTOCOL_VERSION,
+		std::move(typeName),
+		false,
+		{ robot->vm.nodeId },
+		{ static_cast<unsigned int>(robot->variables.productId) }
+	};
+	return { robot, txt };
+#else // ZEROCONF_SUPPORT
+        return { robot };
+#endif // ZEROCONF_SUPPORT
+    }
+
+    using RobotFactory = std::function<RobotInstance(unsigned, std::string, std::string, int16_t)>;
+	struct RobotType
+	{
+		RobotType(std::string prettyName, RobotFactory factory):
+				prettyName(std::move(prettyName)),
+				factory(std::move(factory))
+		{}
+		const std::string prettyName;
+		const RobotFactory factory;
+		unsigned number = 0;
+	};
 }
 
 #endif // __PLAYGROUND_ROBOTS_H

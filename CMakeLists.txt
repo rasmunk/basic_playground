@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.1.0)
 project(playground)
 set(CMAKE_CXX_STANDARD 14)
 
+# Find generated grpc/protobuf files
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 # add extra include directories
 include_directories(/usr/local/include)
 
@@ -47,8 +50,8 @@ set(ASEBA_CORE_LIBRARIES asebadashelplugins asebacommon ${dashel_LIBRARIES})
 # Target and client specific libraries
 add_subdirectory(vm)
 add_subdirectory(compiler)
-add_subdirectory(network)
 add_subdirectory(sim)
+add_subdirectory(network)
 
 find_package(OpenGL REQUIRED)
 if (Qt5DBus_FOUND AND NOT WIN32)
