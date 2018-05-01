@@ -9,9 +9,12 @@
 #include <enki/PhysicalEngine.h>
 #include "../sim/Robots.h"
 
+
+
 class RobotServiceImpl final : public network::RobotService::Service
 {
 private:
+    unsigned int _num_spawned;
     Enki::World& _world;
     std::map<std::string, Enki::RobotType>& _roboTypes;
 

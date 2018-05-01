@@ -16,14 +16,17 @@ service RobotService {
 
 message Robot {
     int32 id = 1;
-    enum Controller_type {
+    enum ControllerType {
         ThymioBasic = 0;
         ThymioEmergent = 1;
         ThymioObstacleAvoidance = 2;
     }
-    Controller_type type = 2;
+    message Config {
+        string port = 1;
+    }
+    ControllerType type = 2;
+    Config config = 3;
 }
-
 message Response {
     int32 status = 1;
 }

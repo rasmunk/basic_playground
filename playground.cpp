@@ -95,8 +95,9 @@ namespace Enki
 	};
 }
 
-enum Managed_by {NETWORK, LOCAL};
+enum ManagedBy {NETWORK, LOCAL};
 
+enum ControllerType { ThymioBasic, ThymioEmergent, ThymioObstacleAvoidance };
 
 using namespace std;
 
